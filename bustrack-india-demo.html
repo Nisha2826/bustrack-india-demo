@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BusTrack India — Demo</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--navy:#10233f;--blue:#246bfd;--bg:#f3f6fb;--muted:#64748b}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:#142238}.top{background:linear-gradient(120deg,#10233f,#174c91);color:#fff;padding:18px 16px 16px}.brand{font-size:23px;font-weight:800;letter-spacing:.2px}.sub{font-size:13px;opacity:.85;margin-top:3px}.pill{display:inline-block;margin-top:10px;padding:5px 9px;border-radius:20px;background:#fff2c8;color:#704d00;font-size:11px;font-weight:800}.wrap{padding:12px;max-width:900px;margin:auto}.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.field{background:white;border:1px solid #dce4ef;border-radius:12px;padding:9px 10px}.field label{display:block;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:3px}.field select,.field input{border:0;background:transparent;width:100%;font:inherit;font-size:14px;outline:none;color:#142238}#map{height:48vh;min-height:300px;border-radius:16px;border:1px solid #d8e1ed;box-shadow:0 5px 20px #10233f10;z-index:1}.note{font-size:12px;color:#64748b;line-height:1.45;margin:9px 2px 12px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.stat{background:white;border:1px solid #e0e7f0;border-radius:12px;padding:10px}.stat strong{display:block;font-size:20px}.stat span{font-size:11px;color:var(--muted)}.panel{background:white;border:1px solid #e0e7f0;border-radius:16px;padding:14px;margin-top:10px}.panel h2{font-size:16px;margin:0 0 10px}.buslist{display:grid;gap:8px}.bus{display:flex;align-items:center;gap:10px;border:1px solid #e5eaf2;border-radius:12px;padding:10px;text-align:left;background:white;width:100%;font:inherit;color:inherit;cursor:pointer}.bus:active{background:#f2f6ff}.busicon{width:38px;height:38px;border-radius:11px;background:#eaf1ff;display:grid;place-items:center;font-size:21px;flex-shrink:0}.busmain{flex:1;min-width:0}.busmain b{display:block;font-size:13px}.busmain small{display:block;color:var(--muted);font-size:12px;margin-top:2px}.tag{font-size:10px;font-weight:800;background:#e8f8ef;color:#137443;padding:4px 6px;border-radius:8px}.details{font-size:13px;line-height:1.7;color:#35445b}.details b{color:#142238}.footer{text-align:center;font-size:11px;color:#718096;padding:15px 5px 22px}.leaflet-popup-content{font-family:system-ui,sans-serif}.bus-pin{font-size:24px;filter:drop-shadow(0 2px 2px #0003)}@media(min-width:700px){.layout{display:grid;grid-template-columns:1.3fr .7fr;gap:12px}.right{display:flex;flex-direction:column}.stats{margin-top:0}#map{height:62vh}.filters{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">🚌 BusTrack India</div><div class="sub">One map for India's buses · First interactive demo</div><span class="pill">DEMO MODE · NOT REAL GPS</span></header>
+<main class="wrap">
+<div class="filters">
+ <div class="field"><label for="state">மாநிலம் / State</label><select id="state"><option value="all">இந்தியா முழுவதும்</option><option value="Tamil Nadu">தமிழ்நாடு</option><option value="Kerala">கேரளா</option><option value="Karnataka">கர்நாடகா</option><option value="Maharashtra">மகாராஷ்டிரா</option><option value="Delhi">டெல்லி</option><option value="Telangana">தெலங்கானா</option><option value="Andhra Pradesh">ஆந்திரப் பிரதேசம்</option></select></div>
+ <div class="field"><label for="kind">பஸ் வகை / Type</label><select id="kind"><option value="all">அனைத்து வகைகளும்</option><option value="Government">அரசுப் பேருந்து</option><option value="Private">தனியார் பஸ்</option></select></div>
+</div>
+<div class="stats"><div class="stat"><strong id="count">12</strong><span>Demo buses shown</span></div><div class="stat"><strong>7</strong><span>Sample states</span></div><div class="stat"><strong>●</strong><span>Simulated positions</span></div></div>
+<div class="layout"><section><div id="map" aria-label="India demo bus map"></div><div class="note">⚠️ இந்த மேப்பில் உள்ள பஸ் இடங்கள் மாதிரி தரவுகள் மட்டுமே. இவை உண்மையான பேருந்துகளின் GPS இருப்பிடங்கள் அல்ல. மேப் இணைய இணைப்புடன் திறக்கப்பட வேண்டும்.</div></section>
+<div class="right"><section class="panel"><h2>🚌 பஸ்கள் / Bus list</h2><div id="buslist" class="buslist"></div></section><section class="panel"><h2>📍 தேர்ந்தெடுத்த பஸ் / Selected bus</h2><div id="details" class="details">மேப்பில் அல்லது பட்டியலில் உள்ள பஸ்ஸைத் தேர்ந்தெடுக்கவும்.</div></section></div></div>
+<div class="footer">BusTrack India · Prototype for learning · Live tracking needs approved GPS/data access</div>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const buses=[
+{id:'TN-01-D-1001',state:'Tamil Nadu',kind:'Government',city:'Chennai',from:'Chennai',to:'Vellore',lat:13.0827,lng:80.2707,route:'Chennai → Vellore',speed:34,next:'Poonamallee'},
+{id:'TN-58-D-2042',state:'Tamil Nadu',kind:'Government',city:'Madurai',from:'Madurai',to:'Dindigul',lat:9.9252,lng:78.1198,route:'Madurai → Dindigul',speed:42,next:'Vadipatti'},
+{id:'TN-38-P-7780',state:'Tamil Nadu',kind:'Private',city:'Coimbatore',from:'Coimbatore',to:'Salem',lat:11.0168,lng:76.9558,route:'Coimbatore → Salem',speed:51,next:'Avinashi'},
+{id:'KL-07-G-2311',state:'Kerala',kind:'Government',city:'Kochi',from:'Kochi',to:'Thrissur',lat:9.9312,lng:76.2673,route:'Kochi → Thrissur',speed:29,next:'Aluva'},
+{id:'KL-15-P-4020',state:'Kerala',kind:'Private',city:'Thiruvananthapuram',from:'Thiruvananthapuram',to:'Kollam',lat:8.5241,lng:76.9366,route:'Thiruvananthapuram → Kollam',speed:46,next:'Attingal'},
+{id:'KA-01-G-5190',state:'Karnataka',kind:'Government',city:'Bengaluru',from:'Bengaluru',to:'Mysuru',lat:12.9716,lng:77.5946,route:'Bengaluru → Mysuru',speed:38,next:'Ramanagara'},
+{id:'KA-09-P-6091',state:'Karnataka',kind:'Private',city:'Mangaluru',from:'Mangaluru',to:'Udupi',lat:12.9141,lng:74.8560,route:'Mangaluru → Udupi',speed:43,next:'Surathkal'},
+{id:'MH-01-G-8821',state:'Maharashtra',kind:'Government',city:'Mumbai',from:'Mumbai',to:'Pune',lat:19.0760,lng:72.8777,route:'Mumbai → Pune',speed:32,next:'Navi Mumbai'},
+{id:'MH-12-P-7788',state:'Maharashtra',kind:'Private',city:'Pune',from:'Pune',to:'Nashik',lat:18.5204,lng:73.8567,route:'Pune → Nashik',speed:49,next:'Chakan'},
+{id:'DL-01-G-1020',state:'Delhi',kind:'Government',city:'New Delhi',from:'New Delhi',to:'Gurugram',lat:28.6139,lng:77.2090,route:'Delhi → Gurugram',speed:25,next:'South Delhi'},
+{id:'TS-09-G-3007',state:'Telangana',kind:'Government',city:'Hyderabad',from:'Hyderabad',to:'Warangal',lat:17.3850,lng:78.4867,route:'Hyderabad → Warangal',speed:40,next:'Ghatkesar'},
+{id:'AP-11-P-8801',state:'Andhra Pradesh',kind:'Private',city:'Vijayawada',from:'Vijayawada',to:'Guntur',lat:16.5062,lng:80.6480,route:'Vijayawada → Guntur',speed:36,next:'Tadepalli'}
+];
+const map=L.map('map').setView([21.2,79.2],4);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+const markers={};let selected=null;const emoji=L.divIcon({className:'',html:'<div class="bus-pin">🚌</div>',iconSize:[30,30],iconAnchor:[15,15]});
+buses.forEach(b=>{const m=L.marker([b.lat,b.lng],{icon:emoji}).bindPopup(`<b>${b.id}</b><br>${b.route}<br><small>DEMO POSITION</small>`);markers[b.id]=m;});
+function visible(){const s=document.getElementById('state').value,k=document.getElementById('kind').value;return buses.filter(b=>(s==='all'||b.state===s)&&(k==='all'||b.kind===k));}
+function showDetails(b){selected=b.id;document.getElementById('details').innerHTML=`<b>${b.id}</b><br>மாநிலம்: ${b.state}<br>வகை: ${b.kind==='Government'?'அரசுப் பேருந்து':'தனியார் பஸ்'}<br>வழித்தடம்: ${b.route}<br>மாதிரி வேகம்: ${b.speed} km/h<br>அடுத்த நிறுத்தம்: ${b.next}<br><br><span style="color:#a16207;font-weight:700">இது Demo தரவு — உண்மையான GPS அல்ல.</span>`;map.setView([b.lat,b.lng],7);markers[b.id].openPopup();}
+function render(){const list=visible();document.getElementById('count').textContent=list.length;Object.values(markers).forEach(m=>map.removeLayer(m));list.forEach(b=>markers[b.id].addTo(map));document.getElementById('buslist').innerHTML=list.map(b=>`<button class="bus" data-id="${b.id}"><span class="busicon">🚌</span><span class="busmain"><b>${b.id}</b><small>${b.route}</small></span><span class="tag">DEMO</span></button>`).join('')||'<p>No demo buses for this filter.</p>';document.querySelectorAll('.bus').forEach(el=>el.addEventListener('click',()=>{const b=buses.find(x=>x.id===el.dataset.id);showDetails(b)}));if(list.length){if(!list.some(b=>b.id===selected))showDetails(list[0]);}else{document.getElementById('details').textContent='இந்தத் தேர்வுக்கு Demo பஸ் இல்லை.';}}
+document.getElementById('state').addEventListener('change',render);document.getElementById('kind').addEventListener('change',render);render();
+</script>
+</body></html>
